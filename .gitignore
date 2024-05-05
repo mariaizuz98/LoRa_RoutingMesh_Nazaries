@@ -4,7 +4,12 @@
 .vscode/launch.json
 .vscode/ipch
 
-.pio/ 
-.vscode/
-src/secrets/secrets.h
-src/http/*
+V1/.pio/ 
+V1/.vscode/
+V1/src/secrets/secrets.h
+V1/src/http/*
+
+V2/.pio/ 
+V2/.vscode/
+V2/src/secrets/secrets.h
+V2/src/http/*
