@@ -11,8 +11,8 @@
 /* ID DE MENSAJES */
 #define RREQ                        0x01
 #define RREP                        0x02
-#define ACK                         0x04
-#define DATA                        0x08
+#define ACK                         0x03
+#define DATA                        0x04
 // #define NOT_READY                   0x10
 
 /* LISTA DE ID GENERICOS */

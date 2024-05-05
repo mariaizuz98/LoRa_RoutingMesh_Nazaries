@@ -5,7 +5,7 @@ extern byte localID;
 routeTableEntry routeTable;
 
 void setupRoutingTable(void){
-    Serial.print("* Creating Routig Table...");
+    Serial.print(" *** Creating Route Table...");
     routeTable.destinationAddress = GATEWAY_ID;
     routeTable.nextHop = 0;
     routeTable.hopCount = 0;
@@ -18,7 +18,6 @@ void setupRoutingTable(void){
 void sendRREQ(byte destinationId){
 
     char sequenceRREQ[50];
-    Serial.println(" ··· Send RREQ ···");
     sprintf(sequenceRREQ,"%d;",localID);
     strcpy(routeTable.sequenceRoute, sequenceRREQ);
     sendPackage(destinationId, RREQ, routeTable.sequenceRoute);
@@ -28,7 +27,6 @@ void sendRREQ(byte destinationId){
 void sendRREP(byte destinationId, char* incomingSequence){
 
     char sequenceRREP[50];
-    Serial.println(" ··· Send RREP ···");
     sprintf(sequenceRREP,"%s%d;", incomingSequence, localID);
     strcpy(routeTable.sequenceRoute,  sequenceRREP);
     sendPackage(destinationId,RREP,routeTable.sequenceRoute);
@@ -39,7 +37,7 @@ void updateRouteTable(const char *sequenceRoute){
 
     byte byte_nextHop;
 
-    Serial.println(" ··· Updating Route ···");
+    Serial.print(" *** Updating Route Table...");
     char* char_nextHop = getNextHop(sequenceRoute);
     //sscanf(char_nextHop,"%hhx", &byte_nextHop);
 
@@ -52,7 +50,8 @@ void updateRouteTable(const char *sequenceRoute){
 
     Serial.printf(" Route Table(dest,nextHop,countHop,sequenceRoute):(  %d  |  %d  |  %d  |  %s  )\r\n", 
                     routeTable.destinationAddress, routeTable.nextHop, routeTable.hopCount, routeTable.sequenceRoute);
-
+    representLCD_Node();
+    
 }
 
 char* getNextHop(const char *sequenceRoute) {

@@ -8,6 +8,7 @@
 #include <LoRa.h>
 // OLED Display libraries for 
 #include "SSD1306.h"
+#include "lcd/lcd.h"
 // WiFi and ThingSpeak libreries
 #ifdef GATEWAY_LORA
     #include "secrets/secrets.h"

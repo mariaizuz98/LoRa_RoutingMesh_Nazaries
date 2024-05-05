@@ -46,7 +46,7 @@ void vTaskListen( void *pvParameters ){
         receiveMsg = false;
         // if(LoRa.parsePacket() != 0) readPackage;
         #ifdef NODE_LORA
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
         #endif
     }
 }

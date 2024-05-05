@@ -25,9 +25,15 @@ void sendPackage(byte destID, byte msgID, char* msg){
     }
     LoRa.endPacket();
 
-    Serial.printf(" ··· Message LoRa send... \r\n");
-    Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  \r\n", 
-                    localID, destID, msgID, msg ? msg : "NULL");
+    String msgID_char;
+    if(msgID == 1)          msgID_char = "RREQ";
+    else if(msgID == 2)     msgID_char = "RREP";
+    else if(msgID == 3)     msgID_char = "ACK";
+    else if(msgID == 4)     msgID_char = "DATA";
+
+    Serial.printf(" ··· Message LoRa send %s ··· \r\n", msgID_char);
+    Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %s  |  Message: %s  \r\n", 
+                    localID, destID, msgID_char, msg ? msg : "NULL");
 }
 
 bool recievePackage (void){
@@ -45,38 +51,44 @@ void readPackage(void){
     while (LoRa.available()) {
         incomingMsg += (char)LoRa.read();
     }
-    Serial.println(" ··· Message LoRa receive...");
-        Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
-                        senderID, receiverID, incomingMsgID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
     
     identifyActionLoRa(incomingMsgID);
-    // if(receiverID == localID){
-    //     Serial.println(" ··· Message LoRa receive...");
-    //     Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
-    //                     senderID, receiverID, incomingMsgID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
-    // }
 }
 
 void identifyActionLoRa(byte msgID){
     switch (msgID){
         case RREQ:
+            Serial.println(" ··· Message LoRa receive RREQ ··· ");
+            Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: RREQ  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+                            senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
             sendRREP(senderID, strdup(incomingMsg.c_str()));
             break;
         case RREP:
-            if(LoRa.packetRssi() > -120 && senderID == GATEWAY_ID){
-                updateRouteTable(strdup(incomingMsg.c_str()));
+            if(receiverID == localID){
+                Serial.println(" ··· Message LoRa receive RREP ··· ");
+                Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: RREP  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+                                senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
+                if(LoRa.packetRssi() > -120 && senderID == GATEWAY_ID){
+                    updateRouteTable(strdup(incomingMsg.c_str()));
+                }
             }
             break;
         case DATA:
             if(receiverID == localID){
-                sendPackage(senderID, ACK, NULL);
+                Serial.println(" ··· Message LoRa receive DATA ··· ");
+                Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: DATA  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+                                senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
                 #ifdef GATEWAY_LORA
                     sendDataToCloud();
                 #endif
+                sendPackage(senderID, ACK, NULL);
             }
             break;
         case ACK:
             if(receiverID == localID){
+                Serial.println(" ··· Message LoRa receive ACK ··· ");
+                Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: ACK  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+                                senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
                 recieveACK = true;
             }
             break;
