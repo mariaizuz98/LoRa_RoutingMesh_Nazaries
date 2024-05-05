@@ -8,9 +8,11 @@
 #include "config/config.h"
 #include "package/package.h"
 #include "sensors/sensor_DHT.h"
+#include "routing/routing.h"
 
 /********************  Functions  *******************/
 void switchStates      (void);
+void sendDATA          (void);
 /****************************************************/
 
 #endif

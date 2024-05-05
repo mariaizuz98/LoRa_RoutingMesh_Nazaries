@@ -57,22 +57,8 @@
 /****************************************************/
 #define ERRNO      -1
 
-/*************  Routing Configuration  **************/
-#define GATEWAY_ID      0x8C
-#define BROADCAST_ID    0x8C
-#define MAX_NODES       10
-#define INVALID_RSSI    -120  // Valor RSSI muy bajo para considerar no conectado
-
-struct RouteInfo {
-    uint32_t nextHop;
-    float cost;
-    bool valid;
-};
-/****************************************************/
-
 /********************  Functions  *******************/
 int config_Init         (void);
-void setupRoutingTable  (void);
 void setupID            (void);
 int setupDisplay        (void);
 int setupLORA           (void);

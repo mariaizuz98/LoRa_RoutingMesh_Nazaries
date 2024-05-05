@@ -9,7 +9,6 @@ bool sendLoRaAgain = false;
 
 void IRAM_ATTR onSendTimer(void){
     portENTER_CRITICAL(&timerMux);
-    timerStart(responseTimer);
     timerStop(sendTimer);
     timerWrite(sendTimer, 0);
     sendLoRa = true;  

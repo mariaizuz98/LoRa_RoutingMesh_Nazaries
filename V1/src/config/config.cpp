@@ -1,19 +1,9 @@
 #include "config.h"
 
-// extern const uint8_t GATEWAY_ID;
-
-// struct RouteInfo {
-//     uint32_t nextHop;
-//     float cost;
-//     bool valid;
-// };
-// RouteInfo routingTable[MAX_NODES];
-
 SSD1306 display (0x3c, OLED_SDA, OLED_SCL);
 #ifdef GATEWAY_LORA
     WiFiClient client;
 #endif
-RouteInfo routingTable[MAX_NODES];
 
 uint32_t chipID = 0;
 byte localID;
@@ -21,16 +11,16 @@ byte localID;
 int config_Init(void){
     Serial.println("");
     setupID();
-    setupRoutingTable();
-    if(setupDisplay() == ERRNO) return -1;
-    if(setupLORA() == ERRNO) return -1;
+    if(setupDisplay() == ERRNO) return ERRNO;
+    if(setupLORA() == ERRNO) return ERRNO;
     #ifdef GATEWAY_LORA
       setupWiFi();
       updateTime();
     #endif
     #ifdef NODE_LORA
-      if(setupTimers() == ERRNO) return -1;
+      if(setupTimers() == ERRNO) return ERRNO;
       setupDHT();
+      setupRoutingTable();
     #endif
 
     #ifdef NODE_LORA
@@ -49,14 +39,6 @@ int config_Init(void){
       display.display();
     #endif
     return 0;
-}
-
-void setupRoutingTable(void){
-    for (int i = 0; i < MAX_NODES; i++) {
-        routingTable[i].nextHop = 0;
-        routingTable[i].cost = INVALID_RSSI;
-        routingTable[i].valid = false;
-    }
 }
 
 /*
@@ -110,6 +92,7 @@ int setupLORA (void){
     LoRa.setTxPower(TXPOWER);
     // Text serial monitor and display
     Serial.println(" LoRa OK");
+    
     return 0;
 }
 

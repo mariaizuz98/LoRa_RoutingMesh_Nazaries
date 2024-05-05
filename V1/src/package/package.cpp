@@ -4,7 +4,7 @@ extern byte localID;
 extern SSD1306 display;
 extern hw_timer_t *sendTimer;
 extern hw_timer_t *responseTimer;
-extern RouteInfo routingTable[MAX_NODES];
+extern routeTableEntry routeTable;
 
 byte senderID;          // sender address
 byte receiverID;          // recipient address
@@ -20,12 +20,14 @@ void sendPackage(byte destID, byte msgID, char* msg){
     LoRa.write(localID);
     LoRa.write(destID);
     LoRa.write(msgID);
-    LoRa.print(msg);  // send the high byte
+    if (msg != NULL) {
+        LoRa.print(msg);  // Only send the message if it's not NULL
+    }
     LoRa.endPacket();
 
     Serial.printf(" ··· Message LoRa send... \r\n");
     Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  \r\n", 
-                    localID, destID, msgID, msg);
+                    localID, destID, msgID, msg ? msg : "NULL");
 }
 
 bool recievePackage (void){
@@ -34,7 +36,7 @@ bool recievePackage (void){
 }
 
 void readPackage(void){
-    // read packet header bytes:
+    // read packet header bytes: 
     senderID = LoRa.read();                             // sender address
     receiverID = LoRa.read();                           // recipient/gateway address
     incomingMsgID = LoRa.read();                        // incoming msg ID
@@ -43,16 +45,28 @@ void readPackage(void){
     while (LoRa.available()) {
         incomingMsg += (char)LoRa.read();
     }
-    if(receiverID == localID){
-        Serial.println(" ··· Message LoRa receive...");
+    Serial.println(" ··· Message LoRa receive...");
         Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
-                        senderID, receiverID, incomingMsgID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr());
-        identifyActionLoRa(incomingMsgID);
-    }
+                        senderID, receiverID, incomingMsgID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
+    
+    identifyActionLoRa(incomingMsgID);
+    // if(receiverID == localID){
+    //     Serial.println(" ··· Message LoRa receive...");
+    //     Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %d  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+    //                     senderID, receiverID, incomingMsgID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
+    // }
 }
 
 void identifyActionLoRa(byte msgID){
     switch (msgID){
+        case RREQ:
+            sendRREP(senderID, strdup(incomingMsg.c_str()));
+            break;
+        case RREP:
+            if(LoRa.packetRssi() > -120 && senderID == GATEWAY_ID){
+                updateRouteTable(strdup(incomingMsg.c_str()));
+            }
+            break;
         case DATA:
             if(receiverID == localID){
                 sendPackage(senderID, ACK, NULL);
@@ -66,32 +80,8 @@ void identifyActionLoRa(byte msgID){
                 recieveACK = true;
             }
             break;
-        case ROUTING:
-            if(receiverID == BROADCAST){
-                #ifdef GATEWAY_LORA
-                    sendPackage(senderID, CONNECT_TO_GATEWAY, NULL);
-                #elif NODE_LORA
-                    // sendPackage(senderID, );
-                #endif
-            } else processRoutingMessage(senderID, LoRa.packetRssi());
-            
-            break;
-        case CONNECT_TO_GATEWAY:
-            #if NODE_LORA
-                processRoutingMessage(senderID, LoRa.packetRssi());
-            #endif
-            break;
         default:
             break;
-    }
-}
-
-void processRoutingMessage(uint32_t from, int rssi){
-    float newCost = -rssi;  // Simplificación: el costo es el negativo del RSSI
-    if (from == GATEWAY_ID || routingTable[from].cost > newCost) {
-        routingTable[from].nextHop = from;  // Directamente desde el origen
-        routingTable[from].cost = newCost;
-        routingTable[from].valid = true;
     }
 }
 
