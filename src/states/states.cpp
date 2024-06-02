@@ -1,13 +1,13 @@
 #include "states.h"
 
 enum states {
-    CONFIG_PERIPHERAL,
     READY,
     LINKED,
     WAITING,
 } state;
 
 char measure[256]; // Arreglo estático para almacenar la medida
+int cntResend = 0;
 
 extern hw_timer_t *sendTimer, *responseTimer;
 extern bool sendLoRa, sendLoRaAgain, recieveACK;
@@ -15,25 +15,20 @@ extern routeTableEntry routeTable;
 
 void switchStates(void){
     switch (state) {
-        case CONFIG_PERIPHERAL:
-            state = READY;
-            break; 
         case READY:
             if(sendLoRa){
                 if(routeTable.nextHop != 0){
-                    sendDATA();
-                    sendLoRa = false;   
-                    state = WAITING;
-                }     
-                else{                        
+                    state = LINKED;
+                } else {                        
                     sendRREQ(GATEWAY_ID);
-                    delay(5000);
+                    delay(2000);
                     //while(routeTable.nextHop == 0);
                 }
             }
             break;
         case LINKED:
             if(sendLoRa){
+                cntResend = 0;
                 sendDATA();
                 sendLoRa = false; 
                 state = WAITING;
@@ -41,8 +36,15 @@ void switchStates(void){
             break;
         case WAITING:
             if(sendLoRaAgain){
-                sendPackage(GATEWAY_ID, DATA, measure);
-                sendLoRaAgain = false;
+                if(cntResend > 5){
+                    state = READY;
+                    routeTable.nextHop = 0;
+                } else {   
+                    cntResend++;
+                    Serial.printf(" --> Se envia de nuevo el paquete con los datos. Contador de reenvio: %d \r\n", cntResend);
+                    sendPackage(GATEWAY_ID, DATA, measure);
+                    sendLoRaAgain = false;
+                }
 
             } else if(recieveACK){
                 timerStop(responseTimer);

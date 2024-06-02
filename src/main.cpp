@@ -33,7 +33,7 @@ void loop(void){
 }
 
 void create_taskStates(void){
-    xTaskCreatePinnedToCore(vTaskStates, "vTaskStates", STACK_SIZE, NULL, 2, NULL, ARDUINO_RUNNING_CORE0);
+    xTaskCreatePinnedToCore(vTaskStates, "vTaskStates", STACK_SIZE, NULL, 1, NULL, ARDUINO_RUNNING_CORE0);
 }
 
 void create_taskListen(void){
@@ -45,9 +45,7 @@ void vTaskListen( void *pvParameters ){
         if(recievePackage()) readPackage();
         receiveMsg = false;
         // if(LoRa.parsePacket() != 0) readPackage;
-        #ifdef NODE_LORA
-            vTaskDelay(pdMS_TO_TICKS(100));
-        #endif
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 

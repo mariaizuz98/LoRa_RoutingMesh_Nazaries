@@ -11,12 +11,12 @@ byte localID;
 int config_Init(void){
     Serial.println("");
     setupID();
-    if(setupDisplay() == ERRNO) return ERRNO;
-    if(setupLORA() == ERRNO) return ERRNO;
     #ifdef GATEWAY_LORA
       setupWiFi();
       updateTime();
     #endif
+    if(setupDisplay() == ERRNO) return ERRNO;
+    if(setupLORA() == ERRNO) return ERRNO;
     #ifdef NODE_LORA
       if(setupTimers() == ERRNO) return ERRNO;
       setupDHT();
@@ -25,18 +25,10 @@ int config_Init(void){
 
     #ifdef NODE_LORA
       Serial.printf("* LoRa Node... ID: 0x%2X\r\n", localID);
-      display.clear();
-      display.setTextAlignment(TEXT_ALIGN_LEFT);
-      display.drawString(0, 0, "LORA NODE");
-      display.drawString(0, 12, "ID: 0x" + String(localID, HEX));
-      display.display();
+      representLCD_Node();
     #else 
       Serial.printf("* LoRa Gateway.. ID: 0x%2X\r\n", localID);
-      display.clear();
-      display.setTextAlignment(TEXT_ALIGN_LEFT);
-      display.drawString(0, 0, "LORA GATEWAY");
-      display.drawString(0, 12, "ID: 0x" + String(localID, HEX));
-      display.display();
+      representLCD_Gateway();
     #endif
     return 0;
 }

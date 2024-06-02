@@ -9,7 +9,7 @@
     #define DHTTYPE DHT11  
 #elif TTGO_LORA_V21    
     #define DHTPIN 4   
-    #define DHTTYPE DHT22   
+    #define DHTTYPE DHT11   
 #endif 
 
 void setupDHT(void);

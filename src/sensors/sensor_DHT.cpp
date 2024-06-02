@@ -6,18 +6,12 @@ char data;
 
 void setupDHT(void){
     dht.begin();
-    #ifdef TTGO_LORA_V1
-        Serial.println("* Initializing DHT11... DHT11 OK");
-    #elif TTGO_LORA_V21
-        Serial.println("* Initializing DHT22... DHT22 OK");
-    #endif
+    Serial.println("* Initializing DHT11... DHT11 OK");
 }
 
 char* readSensorDHT(void){
-    // humidity = dht.readHumidity() * 10;
-    // tempT = dht.readTemperature() * 10;
-    tempT = 189.654;
-    humidity = 230.987;
+    humidity = dht.readHumidity() * 10;
+    tempT = dht.readTemperature() * 10;
     // Check if any reads failed and exit early (to try again).
     if (isnan(humidity) || isnan(tempT)) {
         #ifdef TTGO_LORA_V1
