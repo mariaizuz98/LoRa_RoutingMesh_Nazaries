@@ -24,11 +24,13 @@ void sendRREQ(byte destinationId){
 
 }
 
-void sendRREP(byte destinationId, char* incomingSequence){
+void sendRREP(byte destinationId, byte receiverId, char* incomingSequence){
 
     char sequenceRREP[50];
-    sprintf(sequenceRREP,"%s%d;", incomingSequence, localID);
-    strcpy(routeTable.sequenceRoute,  sequenceRREP);
+    if(receiverId == GATEWAY_ID){
+        sprintf(sequenceRREP,"%s%d;", incomingSequence, localID);
+        strcpy(routeTable.sequenceRoute,  sequenceRREP);
+    }
     sendPackage(destinationId,RREP,routeTable.sequenceRoute);
 
 }
@@ -41,7 +43,7 @@ void updateRouteTable(const char *sequenceRoute){
     char* char_nextHop = getNextHop(sequenceRoute);
     //sscanf(char_nextHop,"%hhx", &byte_nextHop);
 
-    if (sscanf(char_nextHop, "%hhx", &byte_nextHop) != 1) {
+    if (sscanf(char_nextHop, "%d", &byte_nextHop) != 1) {
         Serial.println("Error: Failed to parse next hop.");
         return;
     }

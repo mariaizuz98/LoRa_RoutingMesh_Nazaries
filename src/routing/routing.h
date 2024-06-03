@@ -21,7 +21,7 @@ typedef struct{
 
 void setupRoutingTable      (void);
 void sendRREQ               (byte destinationId);
-void sendRREP               (byte destinationId, char* incomingSequence);
+void sendRREP               (byte destinationId, byte receiverId, char* incomingSequence);
 void updateRouteTable       (const char *sequenceRoute);
 char* getNextHop            (const char *sequenceRoute);
 

@@ -42,7 +42,7 @@ void switchStates(void){
                 } else {   
                     cntResend++;
                     Serial.printf(" --> Se envia de nuevo el paquete con los datos. Contador de reenvio: %d \r\n", cntResend);
-                    sendPackage(GATEWAY_ID, DATA, measure);
+                    sendPackage(routeTable.nextHop, DATA, measure);
                     sendLoRaAgain = false;
                 }
 
