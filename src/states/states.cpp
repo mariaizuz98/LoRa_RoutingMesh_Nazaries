@@ -21,7 +21,7 @@ void switchStates(void){
                     state = LINKED;
                 } else {                        
                     sendRREQ(GATEWAY_ID);
-                    delay(2000);
+                    delay(5000);
                     //while(routeTable.nextHop == 0);
                 }
             }
@@ -42,7 +42,7 @@ void switchStates(void){
                 } else {   
                     cntResend++;
                     Serial.printf(" --> Se envia de nuevo el paquete con los datos. Contador de reenvio: %d \r\n", cntResend);
-                    sendPackage(GATEWAY_ID, DATA, measure);
+                    sendPackage(routeTable.nextHop, DATA, measure);
                     sendLoRaAgain = false;
                 }
 

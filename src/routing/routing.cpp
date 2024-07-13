@@ -5,7 +5,7 @@ extern byte localID;
 routeTableEntry routeTable;
 
 void setupRoutingTable(void){
-    Serial.print(" *** Creating Route Table...");
+    Serial.print("*** Creating Route Table...");
     routeTable.destinationAddress = GATEWAY_ID;
     routeTable.nextHop = 0;
     routeTable.hopCount = 0;
@@ -41,7 +41,7 @@ void updateRouteTable(const char *sequenceRoute){
     char* char_nextHop = getNextHop(sequenceRoute);
     //sscanf(char_nextHop,"%hhx", &byte_nextHop);
 
-    if (sscanf(char_nextHop, "%hhx", &byte_nextHop) != 1) {
+    if (sscanf(char_nextHop, "%d", &byte_nextHop) != 1) {
         Serial.println("Error: Failed to parse next hop.");
         return;
     }
