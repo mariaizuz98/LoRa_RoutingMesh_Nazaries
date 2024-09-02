@@ -13,7 +13,6 @@
 #ifdef GATEWAY_LORA
     #include "secrets/secrets.h"
     #include <WiFi.h>
-    #include <ThingSpeak.h>
     extern WiFiClient client;
 #endif
 // Others libraries

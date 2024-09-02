@@ -6,5 +6,6 @@
 
 void representLCD_Node          (void);
 void representLCD_Gateway       (void);
+void representLCD_LostConection (void);
 
 #endif

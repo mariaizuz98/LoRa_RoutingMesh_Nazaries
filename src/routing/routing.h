@@ -13,16 +13,21 @@
 #define GATEWAY_ID       0x8C
 
 typedef struct{
-    byte destinationAddress;
-    byte nextHop;
-    int hopCount;
-    char sequenceRoute[20];
+    byte        destinationAddress;
+    byte        nextHop;
+    uint        hopCount;
+    char        sequenceRoute[20];
 } routeTableEntry;
 
-void setupRoutingTable      (void);
-void sendRREQ               (byte destinationId);
-void sendRREP               (byte destinationId, byte receiverId, char* incomingSequence);
-void updateRouteTable       (const char *sequenceRoute);
-char* getNextHop            (const char *sequenceRoute);
+void setupRoutingTable              (void);
+void resetRoutingTable              (void);
+void sendRREQ                       (byte destinationId);
+void sendRREP                       (byte destinationId, const char* incomingSequence);
+void sendRRER                       (byte destinationId);
+void analyzeSeqRoute                (int rssi, const char *sequenceRoute);
+void evaluateAndSelectBestRoute     (void);
+int getTotalHopToGateway            (const char *sequenceRoute);
+void updateRouteTable               (const char *sequenceRoute);
+char* getNextHop                    (const char *sequenceRoute);
 
 #endif

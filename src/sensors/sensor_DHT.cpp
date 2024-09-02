@@ -24,7 +24,7 @@ char* readSensorDHT(void){
         sprintf(&data,""); 
         return &data;
     }
-    Serial.printf("* Temperature (ºC):  %.2f  |  Humidity:  %.2f\r\n", tempT/10, humidity/10);
+    Serial.printf("* Temperature:  %.2f  |  Humidity:  %.2f\r\n", tempT/10, humidity/10);
     sprintf(&data, "%d;%d", (int)tempT, (int)humidity);
     return &data;
 }

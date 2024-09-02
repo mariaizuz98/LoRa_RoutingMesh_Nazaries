@@ -5,19 +5,21 @@ extern SSD1306 display;
 extern hw_timer_t *sendTimer;
 extern hw_timer_t *responseTimer;
 extern routeTableEntry routeTable;
+extern EventGroupHandle_t eventSend, eventRouting;
 
-byte senderID;          // sender address
-byte receiverID;          // recipient address
-byte incomingMsgID;     // incoming msg ID
-String incomingMsg;     // data sensor
+byte senderID, senderIDNeighbor;          // sender address
+byte receiverID;                          // recipient address
+byte incomingMsgID;                       // incoming msg ID
+String incomingMsg;                       // data sensor
 int incomingTempT , incomingHumidity = 0;
 bool receiveMsg = false;
 bool recieveACK = false;
 
-void sendPackage(byte destID, byte msgID, char* msg){
+void sendPackage(byte senderID, byte senderNeighborID, byte destID, byte msgID, char* msg){
     // send packet
     LoRa.beginPacket();
-    LoRa.write(localID);
+    LoRa.write(senderID);
+    LoRa.write(senderNeighborID);
     LoRa.write(destID);
     LoRa.write(msgID);
     if (msg != NULL) {
@@ -30,8 +32,9 @@ void sendPackage(byte destID, byte msgID, char* msg){
     else if(msgID == 2)     msgID_char = "RREP";
     else if(msgID == 3)     msgID_char = "ACK";
     else if(msgID == 4)     msgID_char = "DATA";
+    else if(msgID == 5)     msgID_char = "RRER";
 
-    Serial.printf(" ··· Message LoRa send %s ··· \r\n", msgID_char);
+    Serial.printf(" --- Message LoRa send %s --- \r\n", msgID_char);
     Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: %s  |  Message: %s  \r\n", 
                     localID, destID, msgID_char, msg ? msg : "NULL");
 }
@@ -44,6 +47,7 @@ bool recievePackage (void){
 void readPackage(void){
     // read packet header bytes: 
     senderID = LoRa.read();                             // sender address
+    senderIDNeighbor = LoRa.read();                     // sender address neighbor
     receiverID = LoRa.read();                           // recipient/gateway address
     incomingMsgID = LoRa.read();                        // incoming msg ID
     incomingMsg = "";
@@ -58,38 +62,55 @@ void readPackage(void){
 void identifyActionLoRa(byte msgID){
     switch (msgID){
         case RREQ:
-            Serial.println(" ··· Message LoRa receive RREQ ··· ");
+            Serial.println(" --- Message LoRa receive RREQ --- ");
             Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: RREQ  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
                             senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
-            sendRREP(senderID, strdup(incomingMsg.c_str()));
+            sendRREP(senderID, incomingMsg.c_str());
             break;
         case RREP:
             if(receiverID == localID){
-                Serial.println(" ··· Message LoRa receive RREP ··· ");
+                Serial.println(" --- Message LoRa receive RREP --- ");
                 Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: RREP  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
                                 senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
-                if(LoRa.packetRssi() > -120 && senderID == GATEWAY_ID){
-                    updateRouteTable(strdup(incomingMsg.c_str()));
-                }
+                
+                int rssi = LoRa.packetRssi();
+
+                analyzeSeqRoute(rssi, incomingMsg.c_str());
+
+                // xEventGroupSetBits(eventRouting, EVENT_BIT_ROUTING);
+                // xEventGroupSetBits(eventSend, EVENT_BIT_SEND);
             }
             break;
         case DATA:
             if(receiverID == localID){
-                Serial.println(" ··· Message LoRa receive DATA ··· ");
+                Serial.println(" --- Message LoRa receive DATA --- ");
                 Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: DATA  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
                                 senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
                 #ifdef GATEWAY_LORA
                     sendDataToCloud();
                 #endif
-                sendPackage(senderID, ACK, NULL);
+                sendPackage(localID, localID, senderID, ACK, NULL);
+                #ifdef NODE_LORA
+                    sendDATANeighbor(senderIDNeighbor, incomingMsg.c_str());
+                #endif
             }
             break;
         case ACK:
             if(receiverID == localID){
-                Serial.println(" ··· Message LoRa receive ACK ··· ");
+                Serial.println(" --- Message LoRa receive ACK --- ");
                 Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: ACK  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
                                 senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr()); 
                 recieveACK = true;
+            }
+            break;
+        case RERR:
+            if(routeTable.nextHop == senderID){
+                Serial.println(" --- Message LoRa receive RERR --- ");
+                Serial.printf("Sender: 0x%2X |  Destination: 0x%2X  |  Message ID: ACK  |  Message: %s  |  RSSI:  %d  | SNR:  %.2f  \r\n", 
+                                senderID, receiverID, incomingMsg, LoRa.packetRssi(), LoRa.packetSnr());
+                representLCD_LostConection();
+                resetRoutingTable();
+                sendRRER(BROADCAST);
             }
             break;
         default:

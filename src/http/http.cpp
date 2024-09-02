@@ -34,7 +34,7 @@ String serverName = "https://ceres-api-tp1.nazaries.cloud/third_party_api/v1/sub
 String APIkey = "f6341e4d2ed05a18f02c8458e05e2b6d";              // MIZ API-KEY
 const char *APIkey_secret = "cd9d7cc64b6b35ffc98e7f38a29f4f63";  // MIZ API-KEY secret
 
-extern byte senderID;          // sender address
+extern byte senderIDNeighbor;          // sender address
 
 /***************  Timestamp initialisation ***************/
 void updateTime(void) {  // Function that gets current epoch time from a NTP Server
@@ -51,11 +51,11 @@ void newJSON(int t, int h) {
 
   // Nested objects
   JsonObject obj = doc.createNestedObject("HIST");
-  if(senderID == 0x70){
+  if(senderIDNeighbor == 0x70){
     i = 0;
-  } else if (senderID == 0xE8){
+  } else if (senderIDNeighbor == 0xE8){
     i = 1;
-  } else if (senderID == 0xF4){
+  } else if (senderIDNeighbor == 0xF4){
     i = 2;
   }
   // Header

@@ -9,6 +9,8 @@
 #define TIME_SEND_MSG        120000000           // alarma cada 3 min (valor en microsegundos) PARA PRUEBAS
 #define TIME_RESPONSE_MSG    60000000            // alarma cada 1 min (valor en microsegundos) PARA PRUEBAS
 
+#define EVENT_BIT_SEND          2
+
 // extern const uint8_t GATEWAY_ID;
 
 void IRAM_ATTR  onSendTimer(void);

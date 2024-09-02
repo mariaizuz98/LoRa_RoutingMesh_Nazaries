@@ -5,7 +5,7 @@
 #include <DHT.h>
 
 #ifdef TTGO_LORA_V1
-    #define DHTPIN 16   
+    #define DHTPIN 17   
     #define DHTTYPE DHT11  
 #elif TTGO_LORA_V21    
     #define DHTPIN 4   

@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <freertos/event_groups.h>
 #include "config/config.h"
 #include "package/package.h"
 #include "states/states.h"
@@ -14,6 +15,13 @@ void create_taskListen(void);
 void vTaskListen( void * pvParameters );
 void vTaskStates( void * pvParameters );
 
+// Declaración del grupo de eventos
+EventGroupHandle_t eventSend, eventRouting;
+
+// Handle para cada tarea 
+TaskHandle_t taskHandleStates = NULL;
+TaskHandle_t taskHandleListen = NULL;
+
 extern bool receiveMsg;
 
 void setup(void){
@@ -22,6 +30,10 @@ void setup(void){
       delay(10);
     }
     config_Init();
+
+    eventSend = xEventGroupCreate();
+    eventRouting = xEventGroupCreate();
+
     #ifdef NODE_LORA
       create_taskStates();
     #endif
@@ -33,19 +45,18 @@ void loop(void){
 }
 
 void create_taskStates(void){
-    xTaskCreatePinnedToCore(vTaskStates, "vTaskStates", STACK_SIZE, NULL, 1, NULL, ARDUINO_RUNNING_CORE0);
+    xTaskCreatePinnedToCore(vTaskStates, "vTaskStates", STACK_SIZE, NULL, 1, &taskHandleStates, ARDUINO_RUNNING_CORE0);
 }
 
 void create_taskListen(void){
-    xTaskCreatePinnedToCore(vTaskListen, "vTaskListen", STACK_SIZE, NULL, 1, NULL, ARDUINO_RUNNING_CORE1);
+    xTaskCreatePinnedToCore(vTaskListen, "vTaskListen", STACK_SIZE, NULL, 1, &taskHandleListen, ARDUINO_RUNNING_CORE1);
 }
 
 void vTaskListen( void *pvParameters ){
     while(1){
         if(recievePackage()) readPackage();
         receiveMsg = false;
-        // if(LoRa.parsePacket() != 0) readPackage;
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

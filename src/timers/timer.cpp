@@ -4,6 +4,8 @@ hw_timer_t *sendTimer = NULL;
 hw_timer_t *responseTimer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
+extern EventGroupHandle_t eventSend;
+
 bool sendLoRa = false;
 bool sendLoRaAgain = false;
 
@@ -12,6 +14,7 @@ void IRAM_ATTR onSendTimer(void){
     timerStop(sendTimer);
     timerWrite(sendTimer, 0);
     sendLoRa = true;  
+    // xEventGroupSetBits(eventSend, EVENT_BIT_SEND);
     portEXIT_CRITICAL(&timerMux);  
 }
 

@@ -20,8 +20,8 @@ int config_Init(void){
     #ifdef NODE_LORA
       if(setupTimers() == ERRNO) return ERRNO;
       setupDHT();
-      setupRoutingTable();
     #endif
+    setupRoutingTable();
 
     #ifdef NODE_LORA
       Serial.printf("* LoRa Node... ID: 0x%2X\r\n", localID);
@@ -93,7 +93,7 @@ int setupLORA (void){
   Solo en caso de que el dispositivo sea etiquetado como Gateway se hará uso del WiFi
 */
 void setupWiFi(void){
-    #ifdef GATEWAY_LORA
+    #ifdef GATEWAY_LORA    
       Serial.print("* Initializing WiFi...");
       /*Connection to the WiFi Network*/
       WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -103,9 +103,5 @@ void setupWiFi(void){
       }
       // Text serial monitor and display
       Serial.println(" WiFi OK");
-
-      // Connect to the ThingSpeak Platform
-      ThingSpeak.begin(client);
-      delay(1000);
     #endif
 }
