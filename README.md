@@ -27,14 +27,14 @@ Por cuestiones de confidencialidad con la empresa Nazraríes Intelligenia no se 
 ### Carpeta package
 Envio de paquete de datos y recepción del paquetes
 Estructura de paquetes LoRa:
-| ID propio (1 byte)  | ID vecino (1 byte) | ID destino (1 byte) | ID mensaje (1 byte)* | mensaje (variable) |
+| ID propio (1 byte)  | ID vecino (1 byte) | ID destino (1 byte) | ID mensaje (1 byte)(*) | mensaje (variable) |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-*Tipos de mensajes:
-- RREQ (1): mensaje de solicitud para el establecimiento de la ruta (Route Request).
-- RREP (2): mensaje de respuesta para el establecimiento de la ruta (Route Reply).
-- ACK (3): mensaje de confirmación de recepción de datos.
-- DATA (4): mensaje de trasmisión de datos del sensor.
-- RRER (5): mensaje de error en la ruta (Route Error).
+* (*)Tipos de mensajes:
+    - RREQ (1): mensaje de solicitud para el establecimiento de la ruta (Route Request).
+    - RREP (2): mensaje de respuesta para el establecimiento de la ruta (Route Reply).
+    - ACK (3): mensaje de confirmación de recepción de datos.
+    - DATA (4): mensaje de trasmisión de datos del sensor.
+    - RRER (5): mensaje de error en la ruta (Route Error).
 ### Carpeta routing
 Algoitmo de enrutamiento.
 - Envío RREQ
